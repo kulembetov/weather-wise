@@ -6,7 +6,7 @@ import React from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Weather Wise",
+  title: "Weather Wise - Be Confident In What To Wear Today",
   description:
     "An application that displays the weather forecast and current weather conditions based on the user-selected location.",
   keywords: "weather, climate, temperature",
