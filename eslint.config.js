@@ -19,7 +19,7 @@ module.exports = [
       "prettier/prettier": "error",
       "react/react-in-jsx-scope": "off",
       "@typescript-eslint/no-unused-vars": ["error"],
-      "no-console": "warn",
+      "no-console": "off",
     },
     settings: {
       react: {
