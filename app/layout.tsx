@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import React from "react";
-import "react-toastify/dist/ReactToastify.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ToastProviderWrapper } from "@/hooks/useToast";
 
