@@ -27,7 +27,7 @@ const Map = ({ coordinates }: MapProps) => {
             const { lat, lng } = coordinates;
             const map = new google.maps.Map(mapRef.current, {
               center: { lat, lng },
-              zoom: 15,
+              zoom: 10,
               mapId: process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID,
             });
 

@@ -1,38 +1,60 @@
 "use client";
+import { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChangeEvent, FormEvent, useState } from "react";
 import { Location } from "@/types";
-import { toast } from "react-toastify";
+import { useToast } from "@/hooks/useToast";
 
-const SearchForm = ({
-  onSearch,
-}: {
+interface SearchFormProps {
   onSearch: (location: Location) => void;
-}) => {
+  loading: boolean;
+}
+
+const SearchForm = ({ onSearch, loading }: SearchFormProps) => {
   const [query, setQuery] = useState("");
   const [locations, setLocations] = useState<Location[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSearch = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=10&language=en&format=json`
-      );
-      const data = await response.json();
-      if (data.results.length === 0) {
-        toast.error("Location not found. Please try a different location.");
-      }
-      setLocations(data.results || []);
-    } catch (error) {
-      toast.error("Location not found. Please try a different location.");
-    }
-    setLoading(false);
+  const fetchLocations = async (query: string) => {
+    const response = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=10&language=en&format=json`
+    );
+    const data = await response.json();
+    return data.results || [];
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSearch = async () => {
+    if (!query.trim()) {
+      toast({
+        title: "Invalid input",
+        description: "Please enter a location to search.",
+        variant: "error",
+      });
+      return;
+    }
+
+    try {
+      const results = await fetchLocations(query);
+      if (results.length === 0) {
+        toast({
+          title: "Location not found",
+          description: "Please try a different location.",
+          variant: "error",
+        });
+      } else {
+        setLocations(results);
+      }
+    } catch {
+      toast({
+        title: "Location not found",
+        description: "Please try a different location.",
+        variant: "error",
+      });
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleSearch();
   };
@@ -41,15 +63,12 @@ const SearchForm = ({
     onSearch(location);
     setQuery("");
     setLocations([]);
-    toast.success(
-      `Location selected: ${location.name}, ${location.admin1}, ${location.country}`
-    );
   };
 
   return (
     <div className="w-full max-w-md">
       <form
-        className="flex flex-col justify-center items-center gap-3 w-full max-w-md relative"
+        className="relative flex flex-col items-center gap-3 w-full"
         onSubmit={handleSubmit}
       >
         <SearchIcon className="absolute left-2 top-[24%] transform -translate-y-1/2 text-gray-500 z-10" />
@@ -58,16 +77,14 @@ const SearchForm = ({
           placeholder="Search for location"
           className="w-full pl-10 text-center rounded-lg"
           value={query}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setQuery(e.target.value)
-          }
+          onChange={(e) => setQuery(e.target.value)}
         />
         <Button type="submit" className="h-full rounded-lg">
           {loading ? "Searching..." : "Search"}
         </Button>
       </form>
       {locations.length > 0 && (
-        <ul className="mt-3 w-full border rounded-lg">
+        <ul className="mt-3 w-full border rounded-xl">
           {locations.map((location) => (
             <li
               key={location.id}

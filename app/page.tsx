@@ -3,21 +3,20 @@ import { useState, useEffect } from "react";
 import { Location, WeatherData } from "@/types";
 import { fetchLocationDetails } from "@/utils/fetchLocationDetails";
 import { fetchWeatherData } from "@/utils/fetchWeatherData";
-import { toast } from "react-toastify";
 import SearchForm from "@/app/components/SearchForm";
 import WeatherInfo from "@/app/components/WeatherInfo";
 import Map from "@/app/components/Map";
-import ThemeToggler from "@/app/components/ThemeToggler";
-import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
-import Link from "next/link";
+import Footer from "@/app/components/Footer";
+import { useToast } from "@/hooks/useToast";
 
 export default function HomePage() {
-  const defaultCoordinates = { lat: 40.7128, lng: -74.006 }; // New York coordinates
+  const defaultCoordinates = { lat: 40.7128, lng: -74.006 };
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>(
     defaultCoordinates
   );
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const fetchInitialWeather = async (latitude: number, longitude: number) => {
     setLoading(true);
@@ -53,9 +52,11 @@ export default function HomePage() {
           fetchInitialWeather(latitude, longitude);
         },
         () => {
-          toast.error(
-            "Unable to determine your location. Defaulting to New York."
-          );
+          toast({
+            title: "Unable to determine your location",
+            description: "Defaulting to New York.",
+            variant: "error",
+          });
           fetchInitialWeather(defaultCoordinates.lat, defaultCoordinates.lng);
         },
         {
@@ -65,9 +66,11 @@ export default function HomePage() {
         }
       );
     } else {
-      toast.error(
-        "Geolocation is not supported by your browser. Defaulting to New York."
-      );
+      toast({
+        title: "Geolocation not supported",
+        description: "Defaulting to New York.",
+        variant: "error",
+      });
       fetchInitialWeather(defaultCoordinates.lat, defaultCoordinates.lng);
     }
   }, []);
@@ -91,12 +94,17 @@ export default function HomePage() {
       country,
     });
     setLoading(false);
+    toast({
+      title: "Location selected",
+      description: `${name}, ${admin1}, ${country}`,
+      variant: "success",
+    });
   };
 
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow flex flex-col items-center m-5 gap-10">
-        <SearchForm onSearch={handleSearch} />
+        <SearchForm onSearch={handleSearch} loading={loading} />
         {loading ? (
           <p>Loading...</p>
         ) : (
@@ -104,31 +112,7 @@ export default function HomePage() {
         )}
         {coordinates && <Map coordinates={coordinates} />}
       </main>
-      <footer className="text-center p-4 border-t mt-auto">
-        <div className="flex flex-col justify-center items-center gap-3">
-          <ThemeToggler />
-          <ul className="flex gap-2">
-            <li>
-              <Link href="https://github.com/kulembetov">
-                <FaGithub />
-              </Link>
-            </li>
-            <li>
-              <Link href="https://linkedin.com/in/kulembetov">
-                <FaLinkedin />
-              </Link>
-            </li>
-            <li>
-              <Link href="https://twitter.com/arturkulembetov">
-                <FaTwitter />
-              </Link>
-            </li>
-          </ul>
-          <p className="text-sm">
-            © 2024 Artur Kulembetov. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
